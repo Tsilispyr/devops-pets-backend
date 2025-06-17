@@ -2,15 +2,15 @@ pipeline {
     agent any
 
     tools {
-        maven 'Maven 3.9.5' // Βεβαιώσου ότι το έχεις εγκαταστήσει στο Jenkins
+        maven 'Maven 3.9.5' 
     }
 
     stages {
         stage('Checkout') {
-            steps {
-                git 'https://github.com/Tsilispyr/devops-pets-backend.git'
-            }
-        }
+    steps {
+        git branch: 'main', url: 'https://github.com/Tsilispyr/devops-pets-backend.git'
+    }
+}
 
         stage('Build') {
             steps {
