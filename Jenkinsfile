@@ -7,10 +7,10 @@ pipeline {
 
     stages {
         stage('Checkout') {
-    steps {
-        git branch: 'main', url: 'https://github.com/Tsilispyr/devops-pets-backend.git'
-    }
-}
+            steps {
+                git 'https://github.com/Tsilispyr/devops-pets-backend.git'
+            }
+        }
 
         stage('Build') {
             steps {
@@ -26,7 +26,11 @@ pipeline {
 
         stage('Docker Run') {
             steps {
-                sh 'docker run -d -p 8080:8080 devops-pets-backend'
+                sh '''
+                  docker stop devops-pets-backend || true
+                  docker rm devops-pets-backend || true
+                  docker run -d --name devops-pets-backend -p 8080:8080 devops-pets-backend
+                '''
             }
         }
     }
