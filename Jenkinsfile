@@ -7,10 +7,10 @@ pipeline {
 
     stages {
         stage('Checkout') {
-            steps {
-                git 'https://github.com/Tsilispyr/devops-pets-backend.git'
-            }
-        }
+    steps {
+        git branch: 'main', url: 'https://github.com/Tsilispyr/devops-pets-backend.git'
+    }
+}
 
         stage('Build') {
             steps {
