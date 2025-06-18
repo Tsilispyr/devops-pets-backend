@@ -8,11 +8,6 @@ pipeline {
     environment {
         IMAGE_NAME = 'devops-pets-backend'
         CONTAINER_NAME = 'backend'
-        DB_URL = 'jdbc:postgresql://postgres:5432/petdb'
-        DB_USER = 'petuser'
-        DB_PASS = 'petpass'
-        JPA_MODE = 'update'
-        NETWORK = 'devops-pets_default'
     }
 
     stages {
@@ -22,7 +17,7 @@ pipeline {
             }
         }
 
-        stage('Build') {
+        stage('Maven Build') {
             steps {
                 sh 'mvn clean package -DskipTests'
             }
@@ -40,12 +35,12 @@ pipeline {
                   docker stop $CONTAINER_NAME || true
                   docker rm $CONTAINER_NAME || true
                   docker run -d --name $CONTAINER_NAME \
-                    --network $NETWORK \
+                    --network devops-pets_default \
                     -p 8080:8080 \
-                    -e SPRING_DATASOURCE_URL=$DB_URL \
-                    -e SPRING_DATASOURCE_USERNAME=$DB_USER \
-                    -e SPRING_DATASOURCE_PASSWORD=$DB_PASS \
-                    -e SPRING_JPA_HIBERNATE_DDL_AUTO=$JPA_MODE \
+                    -e SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/petdb \
+                    -e SPRING_DATASOURCE_USERNAME=petuser \
+                    -e SPRING_DATASOURCE_PASSWORD=petpass \
+                    -e SPRING_JPA_HIBERNATE_DDL_AUTO=update \
                     $IMAGE_NAME
                 '''
             }
