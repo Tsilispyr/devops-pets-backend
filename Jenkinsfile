@@ -2,15 +2,25 @@ pipeline {
     agent any
 
     tools {
-        maven 'Maven 3.9.5' 
+        maven 'Maven 3.9.5'
+    }
+
+    environment {
+        IMAGE_NAME = 'devops-pets-backend'
+        CONTAINER_NAME = 'backend'
+        DB_URL = 'jdbc:postgresql://postgres:5432/petdb'
+        DB_USER = 'petuser'
+        DB_PASS = 'petpass'
+        JPA_MODE = 'update'
+        NETWORK = 'devops-pets_default'
     }
 
     stages {
         stage('Checkout') {
-    steps {
-        git branch: 'main', url: 'https://github.com/Tsilispyr/devops-pets-backend.git'
-    }
-}
+            steps {
+                git branch: 'main', url: 'https://github.com/Tsilispyr/devops-pets-backend.git'
+            }
+        }
 
         stage('Build') {
             steps {
@@ -20,16 +30,23 @@ pipeline {
 
         stage('Docker Build') {
             steps {
-                sh 'docker build -t devops-pets-backend .'
+                sh 'docker build -t $IMAGE_NAME .'
             }
         }
 
         stage('Docker Run') {
             steps {
                 sh '''
-                  docker stop devops-pets-backend || true
-                  docker rm devops-pets-backend || true
-                  docker run -d --name devops-pets-backend -p 8080:8080 devops-pets-backend
+                  docker stop $CONTAINER_NAME || true
+                  docker rm $CONTAINER_NAME || true
+                  docker run -d --name $CONTAINER_NAME \
+                    --network $NETWORK \
+                    -p 8080:8080 \
+                    -e SPRING_DATASOURCE_URL=$DB_URL \
+                    -e SPRING_DATASOURCE_USERNAME=$DB_USER \
+                    -e SPRING_DATASOURCE_PASSWORD=$DB_PASS \
+                    -e SPRING_JPA_HIBERNATE_DDL_AUTO=$JPA_MODE \
+                    $IMAGE_NAME
                 '''
             }
         }
