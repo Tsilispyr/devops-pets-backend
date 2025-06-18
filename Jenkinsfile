@@ -2,15 +2,22 @@ pipeline {
     agent any
 
     tools {
-        maven 'Maven 3.9.5' 
+        maven 'Maven 3.9.5'
+    }
+
+    environment {
+        IMAGE_NAME = 'devops-pets-backend'
+        CONTAINER_NAME = 'backend'
     }
 
     stages {
         stage('Checkout') {
-    steps {
-        git branch: 'main', url: 'https://github.com/Tsilispyr/devops-pets-backend.git'
-    }
-}
+            steps {
+                git branch: 'main',
+                    credentialsId: 'github-credentials',
+                    url: 'https://github.com/Tsilispyr/devops-pets-backend.git'
+            }
+        }
 
         stage('Build') {
             steps {
@@ -20,16 +27,23 @@ pipeline {
 
         stage('Docker Build') {
             steps {
-                sh 'docker build -t devops-pets-backend .'
+                sh 'docker build -t $IMAGE_NAME .'
             }
         }
 
         stage('Docker Run') {
             steps {
                 sh '''
-                  docker stop devops-pets-backend || true
-                  docker rm devops-pets-backend || true
-                  docker run -d --name devops-pets-backend -p 8080:8080 devops-pets-backend
+                  docker stop $CONTAINER_NAME || true
+                  docker rm $CONTAINER_NAME || true
+                  docker run -d --name $CONTAINER_NAME \
+                    --network devops-pets_default \
+                    -p 8080:8080 \
+                    -e SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/petdb \
+                    -e SPRING_DATASOURCE_USERNAME=petuser \
+                    -e SPRING_DATASOURCE_PASSWORD=petpass \
+                    -e SPRING_JPA_HIBERNATE_DDL_AUTO=update \
+                    $IMAGE_NAME
                 '''
             }
         }
